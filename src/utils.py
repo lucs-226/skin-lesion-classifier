@@ -4,7 +4,7 @@ import numpy as np
 import torch
 import matplotlib.pyplot as plt
 import seaborn as sns
-from sklearn.metrics import confusion_matrix
+from sklearn.metrics import confusion_matrix, classification_report
 from sklearn.manifold import TSNE
 
 def set_seed(seed):
@@ -38,7 +38,7 @@ def plot_training_curves(history, smooth_factor=0.85, save_path="training_curves
     
     plt.savefig(save_path)
     plt.close()
-    print(f"✅ Grafico salvato in: {save_path}")
+    print(f"Plot saved to: {save_path}")
 
 def plot_evaluation_triplet(y_true, y_pred, class_map, save_path="evaluation_matrix.png"):
     class_names = sorted(class_map.keys())
@@ -51,6 +51,7 @@ def plot_evaluation_triplet(y_true, y_pred, class_map, save_path="evaluation_mat
     bin_true = [1 if x in mal_idxs else 0 for x in y_true]
     bin_pred = [1 if x in mal_idxs else 0 for x in y_pred]
     cm_bin = confusion_matrix(bin_true, bin_pred)
+    
     # Normalize Binary
     cm_bin_norm = cm_bin.astype('float') / (cm_bin.sum(axis=1)[:, np.newaxis] + 1e-9)
 
@@ -79,7 +80,7 @@ def plot_evaluation_triplet(y_true, y_pred, class_map, save_path="evaluation_mat
     plt.tight_layout()
     plt.savefig(save_path)
     plt.close()
-    print(f"✅ Matrici salvate in: {save_path}")
+    print(f"Matrices saved to: {save_path}")
 
 def visualize_tsne(embeddings, labels, class_map, limit=1500, save_path="tsne_projection.png"):
     if len(embeddings) > limit:
@@ -100,4 +101,16 @@ def visualize_tsne(embeddings, labels, class_map, limit=1500, save_path="tsne_pr
     
     plt.savefig(save_path)
     plt.close()
-    print(f"✅ t-SNE salvato in: {save_path}")
+    print(f"t-SNE saved to: {save_path}")
+
+def run_oof_evaluation(oof_preds, y_true, class_map, save_path="oof_matrices.png"):
+    print("\n>>> OOF EVALUATION")
+    
+    y_pred_cls = np.argmax(oof_preds, axis=1)
+    y_true = y_true.astype(int)
+    class_names = sorted(class_map.keys())
+
+    print("\n=== CLASSIFICATION REPORT (OOF) ===")
+    print(classification_report(y_true, y_pred_cls, target_names=class_names))
+
+    plot_evaluation_triplet(y_true, y_pred_cls, class_map, save_path=save_path)
