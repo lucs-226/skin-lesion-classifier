@@ -7,17 +7,17 @@
 
 An end-to-end Deep Learning pipeline for multi-class skin cancer classification using the **HAM10000** dataset. This repository implements a robust training strategy focusing on reproducibility, data leakage prevention, class imbalance handling, and **Explainable AI (XAI)**.
 
-## 🎯 Project Objective
+### Project Objective
 The primary goal is to classify dermoscopic images into one of 7 diagnostic categories (e.g., Melanoma, Nevus, Basal Cell Carcinoma).
 Beyond high accuracy, the engineering objective was to build a **modular, production-ready codebase** capable of iterating quickly over different architectures and hyperparameters, bridging the gap between experimental notebooks and professional engineering.
 
-## 🏗️ Model Architecture: Why EfficientNet?
+### Model Architecture: Why EfficientNet?
 We selected **EfficientNet-B3** as the backbone for this task.
 * **Compound Scaling:** Unlike ResNets, which scale depth/width arbitrarily, EfficientNet uniformly scales depth, width, and resolution. This results in better feature extraction for the specific input size ($300 \times 300$).
 * **Parameter Efficiency:** B3 offers a superior accuracy-to-parameter ratio compared to VGG or ResNet50, reducing training time and inference latency.
 * **Transfer Learning:** Pre-trained weights (ImageNet) allow the model to leverage low-level feature detectors immediately, crucial for medical datasets with limited samples.
 
-## ⚙️ Strategy & Methodology
+### Strategy & Methodology
 
 ### 1. Data Integrity & Leakage Prevention
 The HAM10000 dataset contains multiple images of the *same* lesion. A naive random split would place the same lesion in both Train and Validation sets, leading to **Data Leakage**.
@@ -53,3 +53,14 @@ skin-lesion-classifier/
 ├── evaluate.py     # Evaluation on external test set
 ├── app.py          # Gradio Inference Demo
 └── requirements.txt
+
+### Usage info
+Due to size constraints, datasets are not included in the repo. Create a data folder and download the datasets (via Kaggle API or manually):
+* **Option 1:** mkdir -p data/skin-cancer-mnist-ham10000
+                mkdir -p data/unified-dataset-for-skin-cancer-classification
+
+                # Training Data
+                kaggle datasets download -d kmader/skin-cancer-mnist-ham10000 --unzip -p data/skin-cancer-mnist-ham10000
+
+                # External Test Data
+                kaggle datasets download -d cbames/unified-dataset-for-skin-cancer-classification --unzip -p data/unified-dataset-for-skin-cancer-classification
