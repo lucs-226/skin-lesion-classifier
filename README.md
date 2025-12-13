@@ -53,7 +53,7 @@ skin-lesion-classifier/
 ├── evaluate.py     # Evaluation on external test set
 ├── app.py          # Gradio Inference Demo
 └── requirements.txt
----
+```
 
 ### Usage info
 Due to size constraints, datasets are not included in the repo. Create a data folder and download the datasets (via Kaggle API or manually):
