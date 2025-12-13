@@ -9,7 +9,7 @@ from sklearn.model_selection import StratifiedKFold
 from torch.utils.data import DataLoader, WeightedRandomSampler, Subset
 
 from src.config import CONFIG, PATHS
-from src.utils import set_seed, plot_training_curves, visualize_tsne
+from src.utils import set_seed, plot_training_curves, visualize_tsne, run_oof_evaluation
 from src.dataset import SkinDataset, get_transforms
 from src.model import build_model
 from src.engine import Trainer, FocalLoss, run_tta
@@ -33,6 +33,8 @@ def main():
     
     # 2. Training Loop
     skf = StratifiedKFold(n_splits=CONFIG["folds"], shuffle=True, random_state=CONFIG["seed"])
+    
+    oof_preds = np.zeros((len(df_unique), CONFIG["num_classes"]))
     feature_storage = [] 
     history_log = {'train_loss': [], 'val_loss': []}
     
@@ -74,11 +76,14 @@ def main():
             
             print(f"Ep {epoch+1} | T: {t_loss:.4f} | V: {v_loss:.4f}")
 
+        # OOF Inference
+        model.load_state_dict(torch.load(PATHS["weights_dir"] / f"effnetb3_fold{fold}.pth"))
+        oof_preds[val_idx] = run_tta(model, val_loader, CONFIG["device"])
+
         history_log['train_loss'] = fold_train_hist
         history_log['val_loss'] = fold_val_hist
         
         # Save Validation Embeddings for t-SNE
-        model.load_state_dict(torch.load(PATHS["weights_dir"] / f"effnetb3_fold{fold}.pth"))
         model.classifier = nn.Identity()
         model.eval()
         with torch.no_grad():
@@ -88,12 +93,14 @@ def main():
                 feature_storage.append((emb, lbls.numpy()))
 
     print("\nTraining Complete.")
-    plot_training_curves(history_log)
+    plot_training_curves(history_log, save_path="training_curves.png")
     
     if feature_storage:
         all_embs = np.concatenate([x[0] for x in feature_storage])
         all_lbls = np.concatenate([x[1] for x in feature_storage])
-        visualize_tsne(all_embs, all_lbls, CLASSES_MAP)
+        visualize_tsne(all_embs, all_lbls, CLASSES_MAP, save_path="tsne_projection.png")
+
+    run_oof_evaluation(oof_preds, targets, CLASSES_MAP, save_path="oof_results.png")
 
 if __name__ == "__main__":
     main()
