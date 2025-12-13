@@ -16,8 +16,9 @@ def set_seed(seed):
     torch.backends.cudnn.deterministic = True
     torch.backends.cudnn.benchmark = False
 
-def plot_training_curves(history, smooth_factor=0.85):
+def plot_training_curves(history, smooth_factor=0.85, save_path="training_curves.png"):
     def smooth(scalars, weight):
+        if not scalars: return []
         last = scalars[0]
         smoothed = []
         for point in scalars:
@@ -34,9 +35,12 @@ def plot_training_curves(history, smooth_factor=0.85):
     plt.plot(epochs, smooth(history['val_loss'], smooth_factor), label='Val Smooth')
     plt.title("Loss Curves")
     plt.legend()
-    plt.show()
+    
+    plt.savefig(save_path)
+    plt.close()
+    print(f"✅ Grafico salvato in: {save_path}")
 
-def plot_evaluation_triplet(y_true, y_pred, class_map):
+def plot_evaluation_triplet(y_true, y_pred, class_map, save_path="evaluation_matrix.png"):
     class_names = sorted(class_map.keys())
     cm = confusion_matrix(y_true, y_pred)
     
@@ -56,22 +60,28 @@ def plot_evaluation_triplet(y_true, y_pred, class_map):
     sns.heatmap(cm, annot=True, fmt='d', cmap='Blues', ax=axes[0], 
                 xticklabels=class_names, yticklabels=class_names)
     axes[0].set_title("Confusion Matrix (Counts)")
+    axes[0].set_ylabel('True Label')
+    axes[0].set_xlabel('Predicted Label')
     
     # 2. Recall (Normalized)
     cm_norm = cm.astype('float') / (cm.sum(axis=1)[:, np.newaxis] + 1e-9)
     sns.heatmap(cm_norm, annot=True, fmt='.2f', cmap='Reds', ax=axes[1],
                 xticklabels=class_names, yticklabels=class_names)
     axes[1].set_title("Normalized Matrix (Recall)")
+    axes[1].set_xlabel('Predicted Label')
     
     # 3. Binary (%)
     sns.heatmap(cm_bin_norm, annot=True, fmt='.1%', cmap='Greens', ax=axes[2],
                 xticklabels=['Benign', 'Malignant'], yticklabels=['Benign', 'Malignant'])
     axes[2].set_title("Binary Evaluation (Sensitivity & Specificity)")
+    axes[2].set_xlabel('Predicted Label')
 
     plt.tight_layout()
-    plt.show()
+    plt.savefig(save_path)
+    plt.close()
+    print(f"✅ Matrici salvate in: {save_path}")
 
-def visualize_tsne(embeddings, labels, class_map, limit=1500):
+def visualize_tsne(embeddings, labels, class_map, limit=1500, save_path="tsne_projection.png"):
     if len(embeddings) > limit:
         idx = np.random.choice(len(embeddings), limit, replace=False)
         embeddings = embeddings[idx]
@@ -87,4 +97,7 @@ def visualize_tsne(embeddings, labels, class_map, limit=1500):
     sns.scatterplot(x=x_embedded[:,0], y=x_embedded[:,1], hue=lbl_names, palette='tab10', alpha=0.8)
     plt.title("t-SNE Projection")
     plt.legend(bbox_to_anchor=(1.05, 1), loc=2)
-    plt.show()
+    
+    plt.savefig(save_path)
+    plt.close()
+    print(f"✅ t-SNE salvato in: {save_path}")
