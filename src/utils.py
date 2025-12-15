@@ -16,6 +16,26 @@ def set_seed(seed):
     torch.backends.cudnn.deterministic = True
     torch.backends.cudnn.benchmark = False
 
+def plot_class_distribution(df):
+    plt.figure(figsize=(10, 6))
+    
+    # Create the count plot
+    ax = sns.countplot(x='dx', data=df, order=df['dx'].value_counts().index, palette='viridis')
+    
+    plt.title("Class Distribution (Lesion Types)", fontsize=15)
+    plt.xlabel("Diagnosis Class", fontsize=12)
+    plt.ylabel("Number of Images", fontsize=12)
+    
+    # Add count labels on top of bars
+    for p in ax.patches:
+        ax.annotate(f'{int(p.get_height())}', 
+                    (p.get_x() + p.get_width() / 2., p.get_height()), 
+                    ha = 'center', va = 'center', 
+                    xytext = (0, 10), 
+                    textcoords = 'offset points')
+    
+    plt.show()
+
 def plot_training_curves(history, smooth_factor=0.85, save_path="training_curves.png"):
     def smooth(scalars, weight):
         if not scalars: return []
