@@ -58,7 +58,7 @@ skin-lesion-classifier/
 
 ### Usage info
 Due to size constraints, datasets are not included in the repo. Create a data folder and download the datasets (via Kaggle API or manually):
-* **Option 1:**
+* **Option 1**
 ```
 mkdir -p data/skin-cancer-mnist-ham10000
 mkdir -p data/unified-dataset-for-skin-cancer-classification
@@ -69,7 +69,9 @@ kaggle datasets download -d kmader/skin-cancer-mnist-ham10000 --unzip -p data/sk
 # External Test Data
 kaggle datasets download -d cbames/unified-dataset-for-skin-cancer-classification --unzip -p data/unified-dataset-for-skin-cancer-classification
 ```
-**Option 2:**
+**Option 2**
+```
 Download from the links below:
 1.  [HAM10000 (Training)](https://www.kaggle.com/datasets/kmader/skin-cancer-mnist-ham10000)
 2.  [Unified Skin Cancer (External Test)](https://www.kaggle.com/datasets/cbames/unified-dataset-for-skin-cancer-classification)
+```
