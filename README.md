@@ -9,7 +9,7 @@ An end-to-end Deep Learning pipeline for multi-class skin cancer classification 
 
 ### Project Objective
 The primary goal is to classify dermoscopic images into one of 7 diagnostic categories (e.g., Melanoma, Nevus, Basal Cell Carcinoma).
-Beyond high accuracy, the engineering objective was to build a **modular, production-ready codebase** capable of iterating quickly over different architectures and hyperparameters, bridging the gap between experimental notebooks and professional engineering.
+The architecture prioritizes **Recall (Sensitivity)** for malignant classes (Melanoma, Basal Cell Carcinoma) over global accuracy to minimize clinical risk. Evaluation relies on weighted **F1-scores** and confusion matrices to address inherent class imbalance.
 
 ### Model Architecture: Why EfficientNet?
 We selected **EfficientNet-B3** as the backbone for this task.
@@ -40,24 +40,25 @@ The project is structured to separate configuration, logic, and execution script
 
 ```text
 skin-lesion-classifier/
-├── data/           # Dataset storage (Ignored by Git)
-├── weights/        # Trained model weights (.pth)
-├── src/            # Source modules
-│   ├── config.py   # Hyperparameters & Paths
-│   ├── dataset.py  # Data loading & Transforms
-│   ├── model.py    # EfficientNet Architecture
-│   ├── engine.py   # Trainer, Loss, TTA
-│   ├── utils.py    # Metrics & Plotting
-│   └── xai.py      # GradCAM implementation
-├── train.py        # Main training script
-├── evaluate.py     # Evaluation on external test set
-├── app.py          # Gradio Inference Demo
+├── data/               # Dataset storage (Ignored by Git)
+├── weights/            # Trained model weights (.pth)
+├── src/                # Source modules
+│   ├── config.py       # Hyperparameters & Paths
+│   ├── dataset.py      # Data loading & Transforms
+│   ├── model.py        # EfficientNet Architecture
+│   ├── engine.py       # Trainer, Loss, TTA
+│   ├── utils.py        # Metrics & Plotting
+│   └── xai.py          # GradCAM implementation
+├── train.py            # Main training script
+├── evaluate.py         # Evaluation on external test set
+├── app.py              # Gradio Inference Demo
+├── skinlesion.ipynb    # Notebook for repository functions         
 └── requirements.txt
 ```
 
 ### Usage info
 Due to size constraints, datasets are not included in the repo. Create a data folder and download the datasets (via Kaggle API or manually):
-* **Option 1:**
+* **Option 1**
 ```
 mkdir -p data/skin-cancer-mnist-ham10000
 mkdir -p data/unified-dataset-for-skin-cancer-classification
@@ -68,3 +69,9 @@ kaggle datasets download -d kmader/skin-cancer-mnist-ham10000 --unzip -p data/sk
 # External Test Data
 kaggle datasets download -d cbames/unified-dataset-for-skin-cancer-classification --unzip -p data/unified-dataset-for-skin-cancer-classification
 ```
+**Option 2**
+
+Download from the links below:
+1.  [HAM10000 (Training)](https://www.kaggle.com/datasets/kmader/skin-cancer-mnist-ham10000)
+2.  [Unified Skin Cancer (External Test)](https://www.kaggle.com/datasets/vinline/unified-dataset-for-skin-cancer-classification)
+
