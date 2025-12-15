@@ -70,8 +70,8 @@ kaggle datasets download -d kmader/skin-cancer-mnist-ham10000 --unzip -p data/sk
 kaggle datasets download -d cbames/unified-dataset-for-skin-cancer-classification --unzip -p data/unified-dataset-for-skin-cancer-classification
 ```
 **Option 2**
-```
+
 Download from the links below:
 1.  [HAM10000 (Training)](https://www.kaggle.com/datasets/kmader/skin-cancer-mnist-ham10000)
 2.  [Unified Skin Cancer (External Test)](https://www.kaggle.com/datasets/cbames/unified-dataset-for-skin-cancer-classification)
-```
+
