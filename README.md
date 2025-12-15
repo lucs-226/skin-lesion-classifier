@@ -40,18 +40,19 @@ The project is structured to separate configuration, logic, and execution script
 
 ```text
 skin-lesion-classifier/
-├── data/           # Dataset storage (Ignored by Git)
-├── weights/        # Trained model weights (.pth)
-├── src/            # Source modules
-│   ├── config.py   # Hyperparameters & Paths
-│   ├── dataset.py  # Data loading & Transforms
-│   ├── model.py    # EfficientNet Architecture
-│   ├── engine.py   # Trainer, Loss, TTA
-│   ├── utils.py    # Metrics & Plotting
-│   └── xai.py      # GradCAM implementation
-├── train.py        # Main training script
-├── evaluate.py     # Evaluation on external test set
-├── app.py          # Gradio Inference Demo
+├── data/               # Dataset storage (Ignored by Git)
+├── weights/            # Trained model weights (.pth)
+├── src/                # Source modules
+│   ├── config.py       # Hyperparameters & Paths
+│   ├── dataset.py      # Data loading & Transforms
+│   ├── model.py        # EfficientNet Architecture
+│   ├── engine.py       # Trainer, Loss, TTA
+│   ├── utils.py        # Metrics & Plotting
+│   └── xai.py          # GradCAM implementation
+├── train.py            # Main training script
+├── evaluate.py         # Evaluation on external test set
+├── app.py              # Gradio Inference Demo
+├── skinlesion.ipynb    # Notebook for repository functions         
 └── requirements.txt
 ```
 
