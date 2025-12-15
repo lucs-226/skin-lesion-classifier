@@ -9,7 +9,7 @@ An end-to-end Deep Learning pipeline for multi-class skin cancer classification 
 
 ### Project Objective
 The primary goal is to classify dermoscopic images into one of 7 diagnostic categories (e.g., Melanoma, Nevus, Basal Cell Carcinoma).
-Beyond high accuracy, the engineering objective was to build a **modular, production-ready codebase** capable of iterating quickly over different architectures and hyperparameters, bridging the gap between experimental notebooks and professional engineering.
+The architecture prioritizes **Recall (Sensitivity)** for malignant classes (Melanoma, Basal Cell Carcinoma) over global accuracy to minimize clinical risk. Evaluation relies on weighted **F1-scores** and confusion matrices to address inherent class imbalance.
 
 ### Model Architecture: Why EfficientNet?
 We selected **EfficientNet-B3** as the backbone for this task.
