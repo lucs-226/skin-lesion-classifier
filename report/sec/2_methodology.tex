@@ -2,29 +2,28 @@
 \label{sec:methodology}
 
 \subsection{Architecture: EfficientNet-B3}
-We employ EfficientNet-B3, a state-of-the-art convolutional neural network that balances computational efficiency (approx. 12M parameters) with high feature extraction capability.
-\vspace{5pt}
+We employ EfficientNet-B3, a state-of-the-art convolutional neural network that balances computational efficiency (approx. 12M parameters) with high feature extraction capability. The architecture utilizes a compound coefficient $\phi$ to uniformly scale width, depth, and resolution. We use the B3 variant optimized for $300 \times 300$ inputs, featuring Mobile Inverted Bottleneck (MBConv) blocks with Swish activation ($f(x) = x \cdot \sigma(x)$) and Squeeze-and-Excitation modules.
 
-\noindent\textbf{Compound Scaling:} The architecture utilizes a compound coefficient $\phi$ to uniformly scale width, depth, and resolution. We use the B3 variant optimized for $300 \times 300$ inputs, utilizing Mobile Inverted Bottleneck (MBConv) blocks with Swish activation ($f(x) = x \cdot \sigma(x)$) and Squeeze-and-Excitation modules to adaptively recalibrate channel-wise feature responses.
+\subsection{Training Strategy}
+Contrary to standard transfer learning approaches that freeze the backbone, we employ a **Full Fine-Tuning** strategy. The entire network (backbone + classification head) is trainable from the first epoch. This allows the model to adapt its deep semantic features specifically to the dermoscopic domain, rather than relying on generic ImageNet features.
+\begin{itemize}
+    \item \textbf{Classification Head:} The original top layer is replaced by a Dropout layer ($p=0.3$) followed by a Linear Dense layer mapping to the 7 diagnostic classes.
+\end{itemize}
 
-\subsection{Handling Class Imbalance}
-The HAM10000 dataset is highly imbalanced, with the 'Nevus' class dominating over rare classes like 'Dermatofibroma'. Instead of modifying the loss function, we intervene at the data loading stage using a **Weighted Random Sampler**.
-This strategy assigns a sampling probability to each image inversely proportional to its class frequency: $P(x_i) \propto 1/N_{class}$. Consequently, each mini-batch contains a balanced distribution of classes, ensuring that the gradient updates are not biased towards the majority class and preventing the model from converging to trivial solutions.
+\subsection{Handling Imbalance: Hybrid Approach}
+We tackle the severe class imbalance (dominance of 'Nevus') using a dual strategy:
+\begin{itemize}
+    \item \textbf{Sampling:} We utilize a \textbf{Weighted Random Sampler} during data loading. Sampling probabilities are inverse to class frequencies ($P(x) \propto 1/N_{class}$), ensuring each mini-batch is statistically balanced.
+    \item \textbf{Loss Function:} We implement the **Focal Loss** to down-weight easy examples and focus training on hard misclassifications.
+    \begin{equation}
+      FL(p_t) = - (1 - p_t)^\gamma \log(p_t)
+    \end{equation}
+    We set the focusing parameter $\gamma = 2.0$, which effectively reduces the loss contribution from well-classified examples (mostly benign nevi) and prevents them from overwhelming the gradient.
+\end{itemize}
 
-% FIXED LINE BELOW (Added backslash before &)
-\subsection{Advanced Regularization \& Augmentation}
-To prevent overfitting and improve generalization on the decision boundaries, we implement a robust augmentation pipeline.
-
-\vspace{5pt}
-\noindent\textbf{Mixup:} We employ Mixup, a data-agnostic data augmentation routine. It constructs virtual training examples by computing a convex combination of pairs of inputs and their labels:
-\begin{equation}
-  \tilde{x} = \lambda x_i + (1-\lambda) x_j, \quad \tilde{y} = \lambda y_i + (1-\lambda) y_j
-  \label{eq:mixup}
-\end{equation}
-where $\lambda \sim Beta(\alpha, \alpha)$. This encourages the model to behave linearly in-between training examples, smoothing the decision landscape.
-
-\vspace{5pt}
-\noindent\textbf{Random Erasing:} To simulate occlusion and force the network to learn robust features (rather than relying on specific local artifacts), we apply Random Erasing. This technique randomly selects a rectangular region $R_e$ in the image and replaces its pixels with random values.
-
-\subsection{Transfer Learning Strategy}
-The backbone is initialized with ImageNet weights and frozen during the initial epochs to stabilize the custom classification head (Global Average Pooling + Dropout $p=0.2$ + Dense Softmax).
+\subsection{Regularization \& Augmentation}
+To prevent overfitting given the full fine-tuning regime:
+\begin{itemize}
+    \item \textbf{Mixup:} We apply Mixup augmentation ($\alpha=0.4$), which trains the network on convex combinations of pairs of examples and their labels: $\tilde{x} = \lambda x_i + (1-\lambda) x_j$. This enforces smoother decision boundaries.
+    \item \textbf{Random Erasing:} Applied with probability $p=0.2$ to simulate occlusion and force robustness.
+\end{itemize}
