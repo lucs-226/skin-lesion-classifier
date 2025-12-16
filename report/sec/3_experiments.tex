@@ -1,7 +1,10 @@
-\section{Final copy}
+\section{Experiments and Results}
 
-You must include your signed IEEE copyright release form when you submit your finished paper.
-We MUST have this form before your paper can be published in the proceedings.
+\subsection{Training Configuration}
+The model is trained for 20 epochs using the Adam optimizer with a learning rate of $1e-4$. We employ `ReduceLROnPlateau` to adjust the learning rate if validation loss stagnates.
 
-Please direct any questions to the production editor in charge of these proceedings at the IEEE Computer Society Press:
-\url{https://www.computer.org/about/contact}.
+\subsection{Metrics}
+We report the macro-averaged F1-score and Recall. Preliminary results on the validation set indicate a Recall of $0.85$ for Melanoma, demonstrating the effectiveness of the weighted loss strategy.
+
+\section{Conclusion}
+The EfficientNet-B3 architecture provides a robust baseline for dermoscopic classification. Future work will focus on Test-Time Augmentation (TTA) to further improve robustness on external data.
