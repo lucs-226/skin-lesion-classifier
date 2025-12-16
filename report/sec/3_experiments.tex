@@ -1,25 +1,23 @@
 \section{Experiments and Results}
 
 \subsection{Experimental Setup}
-The model was trained using PyTorch on a GPU-accelerated environment.
+The model was implemented in PyTorch and trained on a GPU-accelerated environment.
 \begin{itemize}
-    \item \textbf{Optimizer:} Adam optimizer with an initial learning rate of $1e-4$.
-    \item \textbf{Scheduler:} `ReduceLROnPlateau` decays the learning rate by a factor of 0.5 if validation loss stagnates for 2 epochs.
-    \item \textbf{Early Stopping:} Training halts if validation metric does not improve for 5 consecutive epochs.
+    \item \textbf{Optimization:} We utilized the **AdamW** optimizer with an initial learning rate of $3 \times 10^{-4}$ ($3e-4$) and weight decay of $1e-4$. This optimizer decouples weight decay from the gradient update, offering better generalization than standard Adam.
+    \item \textbf{Scheduling:} A **Cosine Annealing** scheduler was employed to smoothly decrease the learning rate from the initial value to near-zero over the course of 15 epochs, helping the model settle into a flat local minimum.
+    \item \textbf{Batch Size:} Training was conducted with a batch size of 32.
 \end{itemize}
 
 \subsection{Test-Time Augmentation (TTA)}
-To further boost performance and robustness during inference, we employ Test-Time Augmentation (TTA). For every test image, we generate $N=5$ augmented versions (including horizontal flips and slight rotations). The final prediction is obtained by averaging the softmax probabilities of these augmented views:
+To maximize inference reliability, we implement Test-Time Augmentation (TTA). For each test image, predictions are averaged across 3 views: the original image, a horizontal flip, and a vertical flip.
 \begin{equation}
-  \hat{y}_{final} = \frac{1}{N} \sum_{k=1}^{N} f(T_k(x))
+  \hat{y} = \frac{1}{3} \sum_{T \in \{Id, H_{flip}, V_{flip}\}} \text{softmax}(f(T(x)))
 \end{equation}
-This ensemble-like approach effectively mitigates the variance of single-shot predictions and corrects misclassifications caused by ambiguous viewpoints.
+This ensemble-in-time approach significantly reduces prediction variance and improves sensitivity on ambiguous lesions.
 
-\subsection{Results and Discussion}
-The combination of WeightedRandomSampler and Mixup proved critical. The sampler ensured stable convergence for minority classes, while Mixup prevented the "memorization" of training samples.
-
-\vspace{5pt}
-\noindent\textbf{Metrics:} We report a Recall (Sensitivity) of approx. 0.85 for Melanoma on the external validation set. This high sensitivity confirms that the TTA and balanced sampling strategies successfully prioritized the identification of malignant lesions, fulfilling the primary clinical objective of minimizing false negatives. The confusion matrix shows a distributed error pattern, significantly reducing the bias towards the 'Nevus' class compared to a standard baseline.
+\subsection{Results}
+The combination of Full Fine-Tuning and Focal Loss yielded superior results compared to baseline frozen-backbone attempts.
+\textbf{Metrics:} The model achieved a competitive Recall on malignant classes (Melanoma, BCC) on the external validation set. The confusion matrix demonstrates that the Weighted Random Sampler effectively mitigated the bias towards the 'Nevus' class, resulting in a more balanced diagonal distribution. The use of Mixup prevented the model from memorizing the training noise, as evidenced by the stable gap between training and validation loss.
 
 \section{Conclusion}
-We presented a dermoscopic classifier built on EfficientNet-B3. By integrating advanced sampling (WeightedRandomSampler), regularization (Mixup, Random Erasing), and inference techniques (TTA), we achieved a robust model capable of generalization on unseen data.
+We successfully developed a dermoscopic classifier using EfficientNet-B3. By combining a \textbf{Full Fine-Tuning} strategy with robust imbalance handling (\textbf{Focal Loss} + \textbf{Weighted Sampling}) and advanced regularization (\textbf{Mixup}, \textbf{AdamW}), we achieved a clinically relevant model that prioritizes sensitivity for malignant skin lesions.
