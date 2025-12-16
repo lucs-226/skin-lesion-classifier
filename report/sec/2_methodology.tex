@@ -11,7 +11,8 @@ We employ EfficientNet-B3, a state-of-the-art convolutional neural network that 
 The HAM10000 dataset is highly imbalanced, with the 'Nevus' class dominating over rare classes like 'Dermatofibroma'. Instead of modifying the loss function, we intervene at the data loading stage using a **Weighted Random Sampler**.
 This strategy assigns a sampling probability to each image inversely proportional to its class frequency: $P(x_i) \propto 1/N_{class}$. Consequently, each mini-batch contains a balanced distribution of classes, ensuring that the gradient updates are not biased towards the majority class and preventing the model from converging to trivial solutions.
 
-\subsection{Advanced Regularization & Augmentation}
+% FIXED LINE BELOW (Added backslash before &)
+\subsection{Advanced Regularization \& Augmentation}
 To prevent overfitting and improve generalization on the decision boundaries, we implement a robust augmentation pipeline.
 
 \vspace{5pt}
