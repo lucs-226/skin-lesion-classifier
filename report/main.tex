@@ -1,27 +1,32 @@
-%  CVPR 2026 Paper Template
+% CVPR 2026 Paper Template
 \documentclass[10pt,twocolumn,letterpaper]{article}
 
-\usepackage[review]{cvpr} 
+%%%%%%%%% PAPER TYPE
+% 'review': Anonymous, line numbers (requires ID)
+% 'cvpr': Camera-ready, no page numbers
+% 'pagenumbers': Camera-ready WITH page numbers (Best for Reports)
+\usepackage[pagenumbers]{cvpr} 
 
 \input{preamble}
+
 \definecolor{cvprblue}{rgb}{0.21,0.49,0.74}
-\usepackage[pagebackref,breaklinks,colorlinks,allcolors=cvprblue]{hyperref} % [cite: 6]
+\usepackage[pagebackref,breaklinks,colorlinks,allcolors=cvprblue]{hyperref}
 
 %%%%%%%%% TITLE
 \title{Dermatological Lesion Classification via EfficientNet-B3 and Compound Scaling}
 
 %%%%%%%%% AUTHORS
 \author{Luca Santonocito \qquad Sara Maria Secreti \qquad Mehmet Sener\\
-Institution Name\\
-{\tt\small \{santonocito, secreti, sener\}@institution.org}
+University of Catania\\
+{\tt\small \{luca.santonocito, sara.secreti, mehmet.sener\}@studium.unict.it}
 }
 
 \begin{document}
 \maketitle
-\input{sec/0_abstract}    
+\input{sec/0_abstract}
 \input{sec/1_intro}
-\input{sec/2_methodology} 
-\input{sec/3_experiments} 
+\input{sec/2_methodology}
+\input{sec/3_experiments}
 
 {
     \small
