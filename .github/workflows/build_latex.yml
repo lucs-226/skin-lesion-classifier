@@ -1,0 +1,27 @@
+name: Build Paper
+
+on:
+  push:
+    paths:
+      - 'report/**'  
+  workflow_dispatch: 
+
+jobs:
+  build_latex:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Compile LaTeX
+        uses: xu-cheng/latex-action@v3
+        with:
+          root_file: main.tex
+          working_directory: report/
+          
+
+      - name: Upload PDF Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: Dermatological_Classification_Report
+          path: report/main.pdf
