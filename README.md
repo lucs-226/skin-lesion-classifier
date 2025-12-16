@@ -9,7 +9,7 @@ An end-to-end Deep Learning pipeline for multi-class skin cancer classification 
 
 ### Project Objective
 The primary goal is to classify dermoscopic images into one of 7 diagnostic categories (e.g., Melanoma, Nevus, Basal Cell Carcinoma).
-The architecture prioritizes **Recall (Sensitivity)** for malignant classes (Melanoma, Basal Cell Carcinoma) over global accuracy to minimize clinical risk. Evaluation relies on weighted **F1-scores** and confusion matrices to address inherent class imbalance.
+The architecture prioritizes **Recall (Sensitivity)** for malignant classes (Melanoma, Basal Cell Carcinoma) over global accuracy to minimize clinical risk. Evaluation relies on **F1-scores** and confusion matrices.
 
 ### Model Architecture: Why EfficientNet?
 We selected **EfficientNet-B3** as the backbone for this task.
@@ -52,7 +52,8 @@ skin-lesion-classifier/
 ├── train.py            # Main training script
 ├── evaluate.py         # Evaluation on external test set
 ├── app.py              # Gradio Inference Demo
-├── skinlesion.ipynb    # Notebook for repository functions         
+├── skinlesion.ipynb    # Notebook for repository functions
+├── organizedskinlesion.ipynb # A structured implementation enriched with step-by-step markdown documentation     
 └── requirements.txt
 ```
 
