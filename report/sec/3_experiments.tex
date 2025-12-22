@@ -1,7 +1,7 @@
 \section{Experiments and Results}
 
 \subsection{Training Dynamics}
-The model was trained on a GPU-accelerated environment for 20 epochs. We utilized the \textbf{AdamW} optimizer ($1e-4$) coupled with a \textbf{Cosine Annealing} scheduler, which smoothly decays the learning rate to near-zero. This approach allows the model to escape sharp local minima early in training and settle into a flat, robust minimum by the final epochs.
+The model was trained on a GPU-accelerated environment for 15 epochs. We utilized the \textbf{AdamW} optimizer ($3e-4$) coupled with a \textbf{Cosine Annealing} scheduler, which smoothly decays the learning rate to near-zero. This approach allows the model to escape sharp local minima early in training and settle into a flat, robust minimum by the final epochs.
 
 \subsection{Test-Time Augmentation (TTA)}
 To maximize inference reliability in a clinical setting, we implement Test-Time Augmentation. Instead of a single prediction, for each test image $x$, we generate predictions for the original view and its transformed versions (horizontal and vertical flips). The final probability is computed as the average of these views:
@@ -27,4 +27,4 @@ To bridge this gap and move towards a clinically deployable tool, future researc
     \item \textbf{Advanced Normalization:} Implementing rigorous color constancy algorithms (e.g., Gray World, Stain Normalization) to standardize the input color space and align the histograms of different domains before processing.
     \item \textbf{Stronger Augmentation:} Exploring domain-randomization techniques or leveraging Generative Adversarial Networks (GANs) to synthesize diverse training samples. This would force the model to learn shape-invariant features that are independent of chromatic variations.
 \end{itemize}
-Only by addressing these generalization challenges can we ensure that the high sensitivity achieved in the lab translates into patient safety in clinical practice.
+Only by addressing these generalization challenges we can achieve a high performing and clinically useful model.
