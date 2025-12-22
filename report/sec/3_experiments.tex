@@ -10,10 +10,21 @@ To maximize inference reliability in a clinical setting, we implement Test-Time 
 \end{equation}
 This ensemble-in-time approach significantly reduces prediction variance and improves sensitivity on ambiguous lesions where a single viewpoint might be misleading due to artifacts or poor framing.
 
-\subsection{Generalization on External Data}
-A key limitation of many deep learning models is the drop in performance when applied to data from different sources (domain shift). To verify the clinical validity of our framework, we evaluated the trained model not only on the held-out HAM10000 subset but also on a completely distinct external dataset ("Unified Dataset for Skin Cancer Classification").
+\subsection{Generalization and Domain Shift Analysis}
+A key challenge in medical imaging is the "Domain Shift" phenomenon, where the statistical distribution of testing data differs significantly from the training data. To assess this, we evaluated the model on the external "Unified Dataset for Skin Cancer Classification".
 
-Despite the differences in acquisition devices and population demographics, the model maintained a consistent performance profile. The combination of \textbf{Mixup} and \textbf{Full Fine-Tuning} proved crucial here: while standard models showed a performance drop of $\sim 15\%$ on the external set, our proposed framework contained the drop to under $5\%$. Specifically, the Recall for Melanoma remained stable, demonstrating that the learned features (pigment network analysis) are generalizable and not artifacts of the specific source dataset's distribution. This result validates the effectiveness of the Weighted Random Sampler in preventing the model from learning priors based solely on class frequency.
+While the model maintained satisfactory performance on the majority class ('Nevus'), demonstrating that certain textural features are robust across domains, the results on malignant categories were disappointing. The domain gap—likely caused by distinct differences in dermatoscopic hardware, illumination conditions, and patient demographics—severely impacted the model's reliability.
+Crucially, we observed a dangerous increase in the False Negative rate: approximately \textbf{47\%} of actual malignant lesions were misclassified as benign. This alarming error rate highlights that the deep features learned from the HAM10000 source domain, while discriminative within that specific distribution, fail to generalize when lighting and color histograms shift. The model effectively overfitted to the acquisition characteristics (biases) of the source dataset rather than learning purely semantic lesion morphology.
 
 \section{Conclusion}
-We successfully developed a dermoscopic classifier using EfficientNet-B3. By combining a Full Fine-Tuning strategy with robust imbalance handling (Focal Loss, Weighted Sampling) and advanced regularization (Mixup, AdamW), we achieved a clinically relevant model that prioritizes sensitivity for malignant skin lesions.
+In this work, we presented a dermoscopic classification framework based on EfficientNet-B3. Within the boundaries of the HAM10000 benchmark, our proposed strategy of Full Fine-Tuning combined with a custom Focal Loss and Weighted Random Sampling proved highly effective. The model successfully navigated the severe class imbalance, achieving a strong trade-off between precision and recall, and demonstrating excellent convergence properties driven by the AdamW optimizer.
+
+However, the external validation exposed significant criticalities regarding the model's robustness in real-world, multi-center scenarios. The substantial performance drop on the external dataset, characterized by the inability to reliably detect malignant cases outside the training distribution, underscores the severity of the Domain Shift problem in automated diagnosis. The model relies too heavily on source-specific color correlations which do not hold across different acquisition protocols.
+
+To bridge this gap and move towards a clinically deployable tool, future research must prioritize generalization over simple in-domain accuracy. Key strategies to combat Domain Shift include:
+\begin{itemize}
+    \item \textbf{Data Diversity:} Incorporating multi-source datasets during training is essential to expose the model to a wider variety of acquisition devices and skin types, preventing it from memorizing specific camera artifacts.
+    \item \textbf{Advanced Normalization:} Implementing rigorous color constancy algorithms (e.g., Gray World, Stain Normalization) to standardize the input color space and align the histograms of different domains before processing.
+    \item \textbf{Stronger Augmentation:} Exploring domain-randomization techniques or leveraging Generative Adversarial Networks (GANs) to synthesize diverse training samples. This would force the model to learn shape-invariant features that are independent of chromatic variations.
+\end{itemize}
+Only by addressing these generalization challenges can we ensure that the high sensitivity achieved in the lab translates into patient safety in clinical practice.
