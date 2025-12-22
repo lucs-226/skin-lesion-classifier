@@ -1,7 +1,7 @@
 \section{Experiments and Results}
 
 \subsection{Training Dynamics}
-The model was implemented in PyTorch and trained on a GPU-accelerated environment for 20 epochs. [cite_start]We utilized the \textbf{AdamW} optimizer[cite: 52], decoupled from weight decay ($1e-4$), to enhance generalization performance compared to standard Adam. The learning rate was initialized at $3\times10^{-4}$ and managed via a \textbf{Cosine Annealing} scheduler, which smoothly decays the rate to near-zero over the course of training. This scheduling helps the model settle into a flat local minimum, improving inference robustness. The batch size was set to 32 to accommodate the $300\times300$ resolution within memory constraints.
+The model was implemented in PyTorch and trained on a GPU-accelerated environment for 20 epochs. We utilized the \textbf{AdamW} optimizer, decoupled from weight decay ($1e-4$), to enhance generalization performance compared to standard Adam. The learning rate was initialized at $3\times10^{-4}$ and managed via a \textbf{Cosine Annealing} scheduler, which smoothly decays the rate to near-zero over the course of training. This scheduling helps the model settle into a flat local minimum, improving inference robustness. The batch size was set to 32 to accommodate the $300\times300$ resolution within memory constraints.
 
 \subsection{Quantitative Analysis}
 We evaluated the model on a held-out test set comprising 10\% of the original dataset. Table \ref{tab:results} summarizes the per-class performance.
