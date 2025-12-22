@@ -10,15 +10,20 @@ Contrary to standard transfer learning approaches that freeze the backbone, we e
     \item \textbf{Classification Head:} The original top layer is replaced by a Dropout layer ($p=0.3$) followed by a Linear Dense layer mapping to the 7 diagnostic classes.
 \end{itemize}
 
-\subsection{Handling Imbalance: Hybrid Approach}
-We tackle the severe class imbalance (dominance of 'Nevus') using a dual strategy:
+\subsection{Loss Function: Focal Loss}
+The HAM10000 dataset is characterized by a severe long-tail distribution, where the 'Nevus' class dominates over rare malignancies like Dermatofibroma. In standard training with Cross-Entropy (CE) loss, the accumulation of gradients from frequent, easy-to-classify background examples can overwhelm the training signal from hard, rare examples.
+
+To address this, we implement the \textbf{Focal Loss}, formulated to down-weight easy negatives and focus training on hard positives. Unlike standard implementations, we define a custom PyTorch module that operates directly on the model logits. Let $p_t$ be the model's estimated probability for the target class, derived from the Cross-Entropy term as $p_t = \exp(-CE(p, y))$. Our loss function is defined as:
+
+\begin{equation}
+    FL(p_t) = \alpha (1 - p_t)^\gamma CE(p, y)
+    \label{eq:focal_loss}
+\end{equation}
+
+where $\gamma$ is the focusing parameter and $\alpha$ is a weighting factor.
 \begin{itemize}
-    \item \textbf{Sampling:} We utilize a \textbf{Weighted Random Sampler} during data loading. Sampling probabilities are inverse to class frequencies ($P(x) \propto 1/N_{class}$), ensuring each mini-batch is statistically balanced.
-    \item \textbf{Loss Function:} We implement the **Focal Loss** to down-weight easy examples and focus training on hard misclassifications.
-    \begin{equation}
-      FL(p_t) = - (1 - p_t)^\gamma \log(p_t)
-    \end{equation}
-    We set the focusing parameter $\gamma = 2.0$, which effectively reduces the loss contribution from well-classified examples (mostly benign nevi) and prevents them from overwhelming the gradient.
+    \item \textbf{Focusing Parameter ($\gamma=2$):} The term $(1 - p_t)^\gamma$ acts as a modulating factor. When an example is misclassified and $p_t$ is small, the modulation factor is near 1 and the loss is unaffected. Conversely, as $p_t \to 1$ (well-classified), the factor goes to 0, down-weighting the loss contribution. For $\gamma=2$, an example classified with $0.9$ probability contributes $100\times$ less to the gradient than with standard CE.
+    \item \textbf{Implementation Details:} We implement this loss with `reduction='mean'` to normalize gradients across the batch size of 32. This modification stabilizes the training of the EfficientNet-B3 backbone, preventing the 'Nevus' class from saturating the decision boundaries.
 \end{itemize}
 
 \subsection{Regularization \& Augmentation}
