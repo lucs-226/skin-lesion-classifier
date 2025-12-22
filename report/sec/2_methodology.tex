@@ -8,7 +8,7 @@ We employ EfficientNet-B3, selected for its optimal trade-off between parameter 
 Contrary to standard transfer learning approaches that often freeze the convolutional backbone, we employ a \textbf{Full Fine-Tuning} strategy. The entire EfficientNet-B3 architecture is trainable from the first epoch. We initialize weights from an ImageNet pre-trained checkpoint and allow gradients to update all parameters. This enables the deep semantic features of the MBConv blocks to adapt specifically to dermoscopic textures rather than relying on generic edge detectors.
 
 \subsection{Advanced Augmentation Pipeline}
-To guarantee robustness and prevent overfitting, we implemented a state-of-the-art augmentation strategy:
+To guarantee robustness and prevent overfitting, we implemented an heavy augmentation strategy:
 \begin{itemize}
     \item \textbf{Geometric and Photometric:} Images undergo random horizontal and vertical flips, rotations ($20^{\circ}$), and \texttt{ColorJitter} to simulate varying lighting conditions.
     \item \textbf{Random Erasing:} Applied with probability $p=0.2$. This technique randomly masks rectangular regions of the image, simulating occlusions (e.g., hair, artifacts) and forcing the network to learn robust features across the entire lesion rather than relying on a single discriminative part.
