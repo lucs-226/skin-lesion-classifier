@@ -17,7 +17,7 @@ While the model maintained satisfactory performance on the majority class ('Nevu
 Crucially, we observed a dangerous increase in the False Negative rate: approximately \textbf{47\%} of actual malignant lesions were misclassified as benign. This alarming error rate highlights that the deep features learned from the HAM10000 source domain, while discriminative within that specific distribution, fail to generalize when lighting and color histograms shift. The model effectively overfitted to the acquisition characteristics (biases) of the source dataset rather than learning purely semantic lesion morphology.
 
 \section{Conclusion}
-In this work, we presented a dermoscopic classification framework based on EfficientNet-B3. Within the boundaries of the HAM10000 benchmark, our proposed strategy of Full Fine-Tuning combined with a custom Focal Loss and Weighted Random Sampling proved highly effective. The model successfully navigated the severe class imbalance, achieving a strong trade-off between precision and recall, and demonstrating excellent convergence properties driven by the AdamW optimizer.
+Our experimental results on the HAM10000 benchmark place our solution among the top-performing implementations available on public Kaggle notebooks. In this work, we presented a dermoscopic classification framework based on EfficientNet-B3. Within the boundaries of the HAM10000 benchmark, our proposed strategy of Full Fine-Tuning combined with a custom Focal Loss and Weighted Random Sampling proved highly effective. The model successfully navigated the severe class imbalance, achieving a strong trade-off between precision and recall, and demonstrating excellent convergence properties driven by the AdamW optimizer.
 
 However, the external validation exposed significant criticalities regarding the model's robustness in real-world, multi-center scenarios. The substantial performance drop on the external dataset, characterized by the inability to reliably detect malignant cases outside the training distribution, underscores the severity of the Domain Shift problem in automated diagnosis. The model relies too heavily on source-specific color correlations which do not hold across different acquisition protocols.
 
@@ -28,3 +28,12 @@ To bridge this gap and move towards a clinically deployable tool, future researc
     \item \textbf{Stronger Augmentation:} Exploring domain-randomization techniques or leveraging Generative Adversarial Networks (GANs) to synthesize diverse training samples. This would force the model to learn shape-invariant features that are independent of chromatic variations.
 \end{itemize}
 Only by addressing these generalization challenges we can achieve a high performing and clinically useful model.
+
+\section{Author Contributions}
+The development of this framework was a collaborative effort, with specific responsibilities divided as follows:
+
+\begin{itemize}
+    \item \textbf{Mehmet Sener:} Conducted the Exploratory Data Analysis (EDA) and statistical profiling of the HAM10000 dataset, identifying key distribution characteristics.
+    \item \textbf{Sara Maria Secreti:} Designed the regularization pipeline by implementing Mixup and Random Erasing techniques. She was responsible for selecting the EfficientNet-B3 architecture and performing the critical validation on the external dataset.
+    \item \textbf{Luca Santonocito:} Engineered the training strategy, implementing the Weighted Random Sampler and the custom Focal Loss. He also configured the optimization logic (AdamW, Scheduler) and the Test-Time Augmentation (TTA) module.
+\end{itemize}
