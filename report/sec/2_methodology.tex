@@ -10,13 +10,13 @@ Contrary to standard transfer learning approaches that often freeze the convolut
 To guarantee robustness against variations in lighting and acquisition angles, we implemented a rigorous data augmentation pipeline. During training, images undergo:
 \begin{itemize}
     \item \textbf{Geometric Transformations:} Random horizontal and vertical flips, coupled with random rotations (up to $20^{\circ}$).
-    \item \textbf{Photometric Distortions:} Application of `ColorJitter` to randomly perturb brightness, contrast, and saturation.
+    \item \textbf{Photometric Distortions:} Application of \texttt{ColorJitter} to randomly perturb brightness, contrast, and saturation.
 \end{itemize}
 
 \subsection{Loss Function: Focal Loss}
 The HAM10000 dataset is characterized by a severe long-tail distribution, where the 'Nevus' class dominates over rare malignancies. In standard training with Cross-Entropy (CE) loss, the accumulation of gradients from frequent, easy-to-classify background examples can overwhelm the training signal from hard, rare examples.
 
-[cite_start]To address this, we implement a custom \textbf{Focal Loss}[cite: 52]. Let $p_t$ be the model's estimated probability for the target class, derived from the computed Cross-Entropy term as $p_t = \exp(-CE(p, y))$. Our loss function is formulated as:
+To address this, we implement a custom \textbf{Focal Loss}. Let $p_t$ be the model's estimated probability for the target class, derived from the computed Cross-Entropy term as $p_t = \exp(-CE(p, y))$. Our loss function is formulated as:
 
 \begin{equation}
     FL(p_t) = \alpha (1 - p_t)^\gamma \cdot CE(p, y)
@@ -26,5 +26,5 @@ The HAM10000 dataset is characterized by a severe long-tail distribution, where 
 where $\gamma$ is the focusing parameter and $\alpha$ is the balancing factor.
 \begin{itemize}
     \item \textbf{Focusing Mechanism ($\gamma=2$):} The term $(1 - p_t)^\gamma$ acts as a dynamic scale. When an example is misclassified ($p_t \to 0$), the factor is near 1. Conversely, as $p_t \to 1$ (well-classified), the factor approaches 0. This effectively "down-weights" easy examples (like common Nevi), forcing the optimizer to focus on hard, ambiguous lesions.
-    \item \textbf{Implementation:} We set `reduction='mean'` to normalize the loss across the batch, ensuring stable gradient updates for the fine-tuned backbone.
+    \item \textbf{Implementation:} We set \texttt{reduction='mean'} to normalize the loss across the batch, ensuring stable gradient updates for the fine-tuned backbone.
 \end{itemize}
