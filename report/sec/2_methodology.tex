@@ -5,26 +5,24 @@
 We employ EfficientNet-B3, selected for its optimal trade-off between parameter efficiency (approx. 12M parameters) and feature extraction capability. The network utilizes compound scaling to uniformly scale network width, depth, and resolution ($300 \times 300$ pixels), ensuring that the receptive fields are sufficiently large to capture dermatological patterns.
 
 \subsection{Training Strategy}
-Contrary to standard transfer learning approaches that often freeze the convolutional backbone, we employ a \textbf{Full Fine-Tuning} strategy. The entire EfficientNet-B3 architecture is trainable from the first epoch. We initialize weights from an ImageNet pre-trained checkpoint and allow gradients to update all parameters. This enables the deep semantic features of the MBConv blocks to adapt specifically to dermoscopic textures (e.g., pigment networks, globules) rather than relying on generic edge detectors.
+Contrary to standard transfer learning approaches that often freeze the convolutional backbone, we employ a \textbf{Full Fine-Tuning} strategy. The entire EfficientNet-B3 architecture is trainable from the first epoch. We initialize weights from an ImageNet pre-trained checkpoint and allow gradients to update all parameters. This enables the deep semantic features of the MBConv blocks to adapt specifically to dermoscopic textures rather than relying on generic edge detectors.
 
-To guarantee robustness against variations in lighting and acquisition angles, we implemented a rigorous data augmentation pipeline. During training, images undergo:
+\subsection{Advanced Augmentation Pipeline}
+To guarantee robustness and prevent overfitting, we implemented a state-of-the-art augmentation strategy:
 \begin{itemize}
-    \item \textbf{Geometric Transformations:} Random horizontal and vertical flips, coupled with random rotations (up to $20^{\circ}$).
-    \item \textbf{Photometric Distortions:} Application of \texttt{ColorJitter} to randomly perturb brightness, contrast, and saturation.
+    \item \textbf{Geometric and Photometric:} Images undergo random horizontal and vertical flips, rotations ($20^{\circ}$), and \texttt{ColorJitter} to simulate varying lighting conditions.
+    \item \textbf{Random Erasing:} Applied with probability $p=0.2$. This technique randomly masks rectangular regions of the image, simulating occlusions (e.g., hair, artifacts) and forcing the network to learn robust features across the entire lesion rather than relying on a single discriminative part.
+    \item \textbf{Mixup Regularization:} We employ Mixup ($\alpha=0.4$), which trains the network on convex combinations of pairs of examples and their labels: $\tilde{x} = \lambda x_i + (1-\lambda) x_j$. This encourages the model to learn smoother decision boundaries between classes, reducing overconfidence on ambiguous samples.
 \end{itemize}
 
-\subsection{Loss Function: Focal Loss}
-The HAM10000 dataset is characterized by a severe long-tail distribution, where the 'Nevus' class dominates over rare malignancies. In standard training with Cross-Entropy (CE) loss, the accumulation of gradients from frequent, easy-to-classify background examples can overwhelm the training signal from hard, rare examples.
+\subsection{Imbalance Mitigation: Hybrid Approach}
+The HAM10000 dataset exhibits a severe long-tail distribution. We tackle this using a dual strategy:
 
-To address this, we implement a custom \textbf{Focal Loss}. Let $p_t$ be the model's estimated probability for the target class, derived from the computed Cross-Entropy term as $p_t = \exp(-CE(p, y))$. Our loss function is formulated as:
+\textbf{1. Weighted Random Sampler:} During data loading, we oversample the minority classes to ensure that each mini-batch contains a roughly uniform distribution of labels. This prevents the Batch Normalization layers from biasing their statistics towards the majority class ('Nevus').
 
+\textbf{2. Custom Focal Loss:} We implement a loss function that down-weights easy negatives. Let $p_t = \exp(-CE(p, y))$; our objective is:
 \begin{equation}
     FL(p_t) = \alpha (1 - p_t)^\gamma \cdot CE(p, y)
     \label{eq:focal_loss}
 \end{equation}
-
-where $\gamma$ is the focusing parameter and $\alpha$ is the balancing factor.
-\begin{itemize}
-    \item \textbf{Focusing Mechanism ($\gamma=2$):} The term $(1 - p_t)^\gamma$ acts as a dynamic scale. When an example is misclassified ($p_t \to 0$), the factor is near 1. Conversely, as $p_t \to 1$ (well-classified), the factor approaches 0. This effectively "down-weights" easy examples (like common Nevi), forcing the optimizer to focus on hard, ambiguous lesions.
-    \item \textbf{Implementation:} We set \texttt{reduction='mean'} to normalize the loss across the batch, ensuring stable gradient updates for the fine-tuned backbone.
-\end{itemize}
+With $\gamma=2$, the term $(1 - p_t)^\gamma$ effectively zeros out the loss for well-classified examples, focusing the gradient updates on hard, misclassified lesions.
