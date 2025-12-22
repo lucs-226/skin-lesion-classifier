@@ -2,33 +2,29 @@
 \label{sec:methodology}
 
 \subsection{Architecture: EfficientNet-B3}
-We employ EfficientNet-B3, a state-of-the-art convolutional neural network that balances computational efficiency (approx. 12M parameters) with high feature extraction capability. The architecture utilizes a compound coefficient $\phi$ to uniformly scale width, depth, and resolution. We use the B3 variant optimized for $300 \times 300$ inputs, featuring Mobile Inverted Bottleneck (MBConv) blocks with Swish activation ($f(x) = x \cdot \sigma(x)$) and Squeeze-and-Excitation modules.
+We employ EfficientNet-B3, selected for its optimal trade-off between parameter efficiency (approx. 12M parameters) and feature extraction capability. The network utilizes compound scaling to uniformly scale network width, depth, and resolution ($300 \times 300$ pixels), ensuring that the receptive fields are sufficiently large to capture dermatological patterns.
 
 \subsection{Training Strategy}
-Contrary to standard transfer learning approaches that freeze the backbone, we employ a **Full Fine-Tuning** strategy. The entire network (backbone + classification head) is trainable from the first epoch. This allows the model to adapt its deep semantic features specifically to the dermoscopic domain, rather than relying on generic ImageNet features.
+Contrary to standard transfer learning approaches that often freeze the convolutional backbone, we employ a \textbf{Full Fine-Tuning} strategy. The entire EfficientNet-B3 architecture is trainable from the first epoch. We initialize weights from an ImageNet pre-trained checkpoint and allow gradients to update all parameters. This enables the deep semantic features of the MBConv blocks to adapt specifically to dermoscopic textures (e.g., pigment networks, globules) rather than relying on generic edge detectors.
+
+To guarantee robustness against variations in lighting and acquisition angles, we implemented a rigorous data augmentation pipeline. During training, images undergo:
 \begin{itemize}
-    \item \textbf{Classification Head:} The original top layer is replaced by a Dropout layer ($p=0.3$) followed by a Linear Dense layer mapping to the 7 diagnostic classes.
+    \item \textbf{Geometric Transformations:} Random horizontal and vertical flips, coupled with random rotations (up to $20^{\circ}$).
+    \item \textbf{Photometric Distortions:} Application of `ColorJitter` to randomly perturb brightness, contrast, and saturation.
 \end{itemize}
 
 \subsection{Loss Function: Focal Loss}
-The HAM10000 dataset is characterized by a severe long-tail distribution, where the 'Nevus' class dominates over rare malignancies like Dermatofibroma. In standard training with Cross-Entropy (CE) loss, the accumulation of gradients from frequent, easy-to-classify background examples can overwhelm the training signal from hard, rare examples.
+The HAM10000 dataset is characterized by a severe long-tail distribution, where the 'Nevus' class dominates over rare malignancies. In standard training with Cross-Entropy (CE) loss, the accumulation of gradients from frequent, easy-to-classify background examples can overwhelm the training signal from hard, rare examples.
 
-To address this, we implement the \textbf{Focal Loss}, formulated to down-weight easy negatives and focus training on hard positives. Unlike standard implementations, we define a custom PyTorch module that operates directly on the model logits. Let $p_t$ be the model's estimated probability for the target class, derived from the Cross-Entropy term as $p_t = \exp(-CE(p, y))$. Our loss function is defined as:
+[cite_start]To address this, we implement a custom \textbf{Focal Loss}[cite: 52]. Let $p_t$ be the model's estimated probability for the target class, derived from the computed Cross-Entropy term as $p_t = \exp(-CE(p, y))$. Our loss function is formulated as:
 
 \begin{equation}
-    FL(p_t) = \alpha (1 - p_t)^\gamma CE(p, y)
+    FL(p_t) = \alpha (1 - p_t)^\gamma \cdot CE(p, y)
     \label{eq:focal_loss}
 \end{equation}
 
-where $\gamma$ is the focusing parameter and $\alpha$ is a weighting factor.
+where $\gamma$ is the focusing parameter and $\alpha$ is the balancing factor.
 \begin{itemize}
-    \item \textbf{Focusing Parameter ($\gamma=2$):} The term $(1 - p_t)^\gamma$ acts as a modulating factor. When an example is misclassified and $p_t$ is small, the modulation factor is near 1 and the loss is unaffected. Conversely, as $p_t \to 1$ (well-classified), the factor goes to 0, down-weighting the loss contribution. For $\gamma=2$, an example classified with $0.9$ probability contributes $100\times$ less to the gradient than with standard CE.
-    \item \textbf{Implementation Details:} We implement this loss with `reduction='mean'` to normalize gradients across the batch size of 32. This modification stabilizes the training of the EfficientNet-B3 backbone, preventing the 'Nevus' class from saturating the decision boundaries.
-\end{itemize}
-
-\subsection{Regularization \& Augmentation}
-To prevent overfitting given the full fine-tuning regime:
-\begin{itemize}
-    \item \textbf{Mixup:} We apply Mixup augmentation ($\alpha=0.4$), which trains the network on convex combinations of pairs of examples and their labels: $\tilde{x} = \lambda x_i + (1-\lambda) x_j$. This enforces smoother decision boundaries.
-    \item \textbf{Random Erasing:} Applied with probability $p=0.2$ to simulate occlusion and force robustness.
+    \item \textbf{Focusing Mechanism ($\gamma=2$):} The term $(1 - p_t)^\gamma$ acts as a dynamic scale. When an example is misclassified ($p_t \to 0$), the factor is near 1. Conversely, as $p_t \to 1$ (well-classified), the factor approaches 0. This effectively "down-weights" easy examples (like common Nevi), forcing the optimizer to focus on hard, ambiguous lesions.
+    \item \textbf{Implementation:} We set `reduction='mean'` to normalize the loss across the batch, ensuring stable gradient updates for the fine-tuned backbone.
 \end{itemize}
