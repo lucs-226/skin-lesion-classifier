@@ -6,7 +6,7 @@ To ensure statistically robust performance estimates and prevent overfitting to 
 
 \subsection{Architecture and Training Strategy}
 We employ \textbf{EfficientNet-B3}, selected for its efficiency (12M parameters) and Compound Scaling capabilities ($300 \times 300$ input). Contrary to conservative approaches, we adopt a \textbf{Full Fine-Tuning} strategy: the entire backbone is trainable from the first epoch, allowing the deep MBConv blocks to adapt their spatial filters specifically to dermoscopic textures rather than generic ImageNet features.
-The training utilizes the \textbf{AdamW} optimizer ($3r=3\times10^{-4}$) with a \textbf{Cosine Annealing} scheduler to foster convergence into flat, robust minima.
+The training utilizes the \textbf{AdamW} optimizer ($lr=3\times10^{-4}$) with a \textbf{Cosine Annealing} scheduler to foster convergence into flat, robust minima.
 
 \subsection{Augmentation and Regularization}
 To improve robustness against acquisition variability, we implemented a strong augmentation pipeline. Images undergo geometric transformations (random flips, $20^{\circ}$ rotations) and photometric distortions via \texttt{ColorJitter}. We further integrated \textbf{Random Erasing} ($p=0.2$) to simulate occlusions and \textbf{Mixup} ($\alpha=0.4$) to enforce smoother decision boundaries.
